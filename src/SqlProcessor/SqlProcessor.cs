@@ -1,14 +1,15 @@
 ﻿// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace SqlProcessorDemo;
 
 public static class SqlProcessor
 {
-    private static readonly Hashtable Cache = [];
+    private static readonly ConcurrentDictionary<string, SqlStatementInfo> Cache = new();
+
     private static readonly StringBuilder SanitizedSqlBuilder = new(1000);
     private static readonly StringBuilder DbQuerySummaryBuilder = new(1000);
     private static int sanitizedSqlBuilderInUse = 0;
@@ -17,6 +18,11 @@ public static class SqlProcessor
     // public for demo purposes only
     public static int CacheCapacity = 1000;
 
+    // Maintain our own approximate count to avoid ConcurrentDictionary.Count on hot path.
+    // We only increment on successful TryAdd. This may result in a slightly oversized cache
+    // under high concurrency but this is acceptable for this scenario.
+    private static int approxCacheCount;
+
     public static SqlStatementInfo GetSanitizedSql(string? sql)
     {
         if (sql == null)
@@ -24,28 +30,28 @@ public static class SqlProcessor
             return default;
         }
 
-        if (Cache[sql] is not SqlStatementInfo sqlStatementInfo)
+        if (Cache.TryGetValue(sql, out var sqlStatementInfo))
         {
-            sqlStatementInfo = SanitizeSql(sql);
-
-            if (Cache.Count == CacheCapacity)
-            {
-                return sqlStatementInfo;
-            }
-
-            lock (Cache)
-            {
-                if ((Cache[sql] as SqlStatementInfo?) == null)
-                {
-                    if (Cache.Count < CacheCapacity)
-                    {
-                        Cache[sql] = sqlStatementInfo;
-                    }
-                }
-            }
+            return sqlStatementInfo;
         }
 
-        return sqlStatementInfo;
+        sqlStatementInfo = SanitizeSql(sql);
+
+        // Fast-path capacity check using our own approximate count to avoid ConcurrentDictionary.Count cost.
+        if (Volatile.Read(ref approxCacheCount) >= CacheCapacity)
+        {
+            return sqlStatementInfo;
+        }
+
+        // Attempt to add when under capacity. Increment our count only on successful add.
+        if (Cache.TryAdd(sql, sqlStatementInfo))
+        {
+            Interlocked.Increment(ref approxCacheCount);
+            return sqlStatementInfo;
+        }
+
+        // If another thread added meanwhile, return the cached value if available.
+        return Cache.TryGetValue(sql, out var existing) ? existing : sqlStatementInfo;
     }
 
     private static SqlStatementInfo SanitizeSql(string sql)
