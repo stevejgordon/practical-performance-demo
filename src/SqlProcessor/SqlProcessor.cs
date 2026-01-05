@@ -331,8 +331,7 @@ public static class SqlProcessor
             if (state.CaptureNextTokenAsTarget)
             {
                 state.CaptureNextTokenAsTarget = false;
-                var collection = sql.Substring(index, i - index);
-                state.DbQuerySummary.Append(' ').Append(collection);
+                state.DbQuerySummary.Append(' ').Append(sql.AsSpan(index, i - index));
             }
 
             i -= 1;
