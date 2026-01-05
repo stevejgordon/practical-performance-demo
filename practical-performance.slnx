@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SqlProcessor/SqlProcessorDemo.csproj" Id="8dc15c86-cbce-4fd8-ac79-e03105183dc1" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/SqlProcessorBenchmarks/SqlProcessorBenchmarks.csproj" Id="4a08a93e-b2e8-402d-a912-ad53d3761598" />
+    <Project Path="test/SqlProcessorTests/SqlProcessorTests.csproj" Id="6975e55c-760d-4b63-9b9c-83999bafcf94" />
+  </Folder>
+</Solution>
