@@ -46,7 +46,11 @@ public static class SqlProcessor
 
     private static SqlStatementInfo SanitizeSql(string sql)
     {
-        var state = new SqlProcessorState();
+        var state = new SqlProcessorState
+        {
+            SanitizedSql = new StringBuilder(sql.Length),
+            DbQuerySummary = new StringBuilder(sql.Length)
+        };
 
         for (var i = 0; i < sql.Length; ++i)
         {
@@ -386,9 +390,9 @@ public static class SqlProcessor
 
     internal class SqlProcessorState
     {
-        public StringBuilder SanitizedSql { get; set; } = new StringBuilder();
+        public required StringBuilder SanitizedSql { get; init; }
 
-        public StringBuilder DbQuerySummary { get; set; } = new StringBuilder();
+        public required StringBuilder DbQuerySummary { get; init; }
 
         public bool CaptureNextTokenAsTarget { get; set; }
 
