@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Configs;
+﻿using BenchmarkDotNet.Columns;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
 using JetBrains.Profiler.Api;
 using SqlProcessorDemo;
@@ -68,7 +69,9 @@ switch (mode)
         break;
 
     default:
-        var config = ManualConfig.Create(DefaultConfig.Instance).WithArtifactsPath("BenchmarkResults");
+        var config = ManualConfig.Create(DefaultConfig.Instance)
+            .WithArtifactsPath("BenchmarkResults")
+            .HideColumns(Column.Error, Column.StdDev, Column.Method);
         BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
         break;
 }

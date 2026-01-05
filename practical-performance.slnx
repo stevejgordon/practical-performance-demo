@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/SqlProcessor/SqlProcessorDemo.csproj" Id="8dc15c86-cbce-4fd8-ac79-e03105183dc1" />
   </Folder>
