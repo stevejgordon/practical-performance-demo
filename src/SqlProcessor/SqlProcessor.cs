@@ -9,6 +9,10 @@ namespace SqlProcessorDemo;
 public static class SqlProcessor
 {
     private static readonly Hashtable Cache = [];
+    private static readonly StringBuilder SanitizedSqlBuilder = new(1000);
+    private static readonly StringBuilder DbQuerySummaryBuilder = new(1000);
+    private static int sanitizedSqlBuilderInUse = 0;
+    private static int dbQuerySummaryBuilderInUse = 0;
 
     // public for demo purposes only
     public static int CacheCapacity = 1000;
@@ -46,33 +50,77 @@ public static class SqlProcessor
 
     private static SqlStatementInfo SanitizeSql(string sql)
     {
-        var state = new SqlProcessorState
+        StringBuilder sanitizedSql;
+        StringBuilder dbQuerySummary;
+        bool useCachedSanitized = false;
+        bool useCachedSummary = false;
+
+        // Try to acquire the cached StringBuilder instances using lock-free atomic operations
+        if (Interlocked.CompareExchange(ref sanitizedSqlBuilderInUse, 1, 0) == 0)
         {
-            SanitizedSql = new StringBuilder(sql.Length),
-            DbQuerySummary = new StringBuilder(sql.Length)
-        };
-
-        for (var i = 0; i < sql.Length; ++i)
+            sanitizedSql = SanitizedSqlBuilder;
+            sanitizedSql.Clear();
+            useCachedSanitized = true;
+        }
+        else
         {
-            if (SkipComment(sql, ref i))
-            {
-                continue;
-            }
-
-            if (SanitizeStringLiteral(sql, ref i) ||
-                SanitizeHexLiteral(sql, ref i) ||
-                SanitizeNumericLiteral(sql, ref i))
-            {
-                state.SanitizedSql.Append('?');
-                continue;
-            }
-
-            WriteToken(sql, ref i, state);
+            sanitizedSql = new StringBuilder(sql.Length);
         }
 
-        return new SqlStatementInfo(
-            state.SanitizedSql.ToString(),
-            state.DbQuerySummary.ToString());
+        if (Interlocked.CompareExchange(ref dbQuerySummaryBuilderInUse, 1, 0) == 0)
+        {
+            dbQuerySummary = DbQuerySummaryBuilder;
+            dbQuerySummary.Clear();
+            useCachedSummary = true;
+        }
+        else
+        {
+            dbQuerySummary = new StringBuilder(sql.Length);
+        }
+
+        try
+        {
+            var state = new SqlProcessorState
+            {
+                SanitizedSql = sanitizedSql,
+                DbQuerySummary = dbQuerySummary
+            };
+
+            for (var i = 0; i < sql.Length; ++i)
+            {
+                if (SkipComment(sql, ref i))
+                {
+                    continue;
+                }
+
+                if (SanitizeStringLiteral(sql, ref i) ||
+                    SanitizeHexLiteral(sql, ref i) ||
+                    SanitizeNumericLiteral(sql, ref i))
+                {
+                    state.SanitizedSql.Append('?');
+                    continue;
+                }
+
+                WriteToken(sql, ref i, state);
+            }
+
+            return new SqlStatementInfo(
+                state.SanitizedSql.ToString(),
+                state.DbQuerySummary.ToString());
+        }
+        finally
+        {
+            // Release the cached instances using volatile write
+            if (useCachedSanitized)
+            {
+                Interlocked.Exchange(ref sanitizedSqlBuilderInUse, 0);
+            }
+
+            if (useCachedSummary)
+            {
+                Interlocked.Exchange(ref dbQuerySummaryBuilderInUse, 0);
+            }
+        }
     }
 
     private static bool SkipComment(string sql, ref int index)
