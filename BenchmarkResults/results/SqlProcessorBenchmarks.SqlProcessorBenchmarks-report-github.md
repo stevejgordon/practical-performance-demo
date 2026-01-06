@@ -8,14 +8,14 @@ Intel Core Ultra 9 185H 2.50GHz, 1 CPU, 22 logical and 16 physical cores
 
 
 ```
-| Method          | Sql                  | Mean     | Error    | StdDev   | Allocated |
-|---------------- |--------------------- |---------:|---------:|---------:|----------:|
-| **GetSanitizedSql** | **CREAT(...)s(Id) [56]** | **353.1 ns** |  **6.21 ns** |  **5.81 ns** |     **216 B** |
-| **GetSanitizedSql** | **DELET(...) = 42 [32]** | **235.8 ns** |  **2.74 ns** |  **2.43 ns** |     **176 B** |
-| **GetSanitizedSql** | **INSER(...)3e-5) [76]** | **477.1 ns** |  **9.06 ns** |  **8.47 ns** |     **232 B** |
-| **GetSanitizedSql** | **SELEC(...)ls od [39]** | **275.3 ns** |  **3.31 ns** |  **3.09 ns** |     **224 B** |
-| **GetSanitizedSql** | **SELE(...)tory [111]**  | **517.3 ns** |  **5.14 ns** |  **4.29 ns** |     **464 B** |
-| **GetSanitizedSql** | **SELEC(...)table [69]** | **211.8 ns** |  **4.17 ns** |  **3.90 ns** |     **168 B** |
-| **GetSanitizedSql** | **SELEC(...) c.Id [74]** | **482.3 ns** |  **3.44 ns** |  **3.05 ns** |     **288 B** |
-| **GetSanitizedSql** | **SELE(...)_id) [101]**  | **651.1 ns** | **12.46 ns** | **11.65 ns** |     **352 B** |
-| **GetSanitizedSql** | **UPDAT(...) = 42 [44]** | **311.2 ns** |  **6.05 ns** |  **5.66 ns** |     **184 B** |
+| Method          | Sql                  | Mean     | Error   | StdDev  | Allocated |
+|---------------- |--------------------- |---------:|--------:|--------:|----------:|
+| **GetSanitizedSql** | **CREAT(...)s(Id) [56]** | **257.1 ns** | **3.11 ns** | **2.76 ns** |     **208 B** |
+| **GetSanitizedSql** | **DELET(...) = 42 [32]** | **163.2 ns** | **1.97 ns** | **1.64 ns** |     **128 B** |
+| **GetSanitizedSql** | **INSER(...)3e-5) [76]** | **319.9 ns** | **2.82 ns** | **2.36 ns** |     **192 B** |
+| **GetSanitizedSql** | **SELEC(...)ls od [39]** | **208.6 ns** | **3.63 ns** | **9.30 ns** |     **184 B** |
+| **GetSanitizedSql** | **SELE(...)tory [111]**  | **342.7 ns** | **6.09 ns** | **5.40 ns** |     **424 B** |
+| **GetSanitizedSql** | **SELEC(...)table [69]** | **147.8 ns** | **1.78 ns** | **1.66 ns** |     **128 B** |
+| **GetSanitizedSql** | **SELEC(...) c.Id [74]** | **313.2 ns** | **5.11 ns** | **4.78 ns** |     **248 B** |
+| **GetSanitizedSql** | **SELE(...)_id) [101]**  | **384.9 ns** | **6.34 ns** | **5.62 ns** |     **312 B** |
+| **GetSanitizedSql** | **UPDAT(...) = 42 [44]** | **203.9 ns** | **2.85 ns** | **2.67 ns** |     **144 B** |
