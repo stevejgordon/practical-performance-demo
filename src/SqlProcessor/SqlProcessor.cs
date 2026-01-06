@@ -248,8 +248,13 @@ public static class SqlProcessor
             }
         }
 
+        var sanitizedSqlSpan = buffer.Slice(0, state.SanitizedPosition);
+
+        // If the sanitized SQL is identical to the input SQL, we can reuse the original string instance.
+        var sanitizedSql = sanitizedSqlSpan.SequenceEqual(sqlSpan) ? sql : sanitizedSqlSpan.ToString();
+
         var sqlStatementInfo = new SqlStatementInfo(
-            buffer.Slice(0, state.SanitizedPosition).ToString(),
+            sanitizedSql,
             summary.Slice(0, summaryLength).ToString());
 
         // We don't clear the buffer as we know the content has been sanitized
