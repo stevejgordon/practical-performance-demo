@@ -33,7 +33,7 @@ switch (mode)
         PrepareForProfiling(1000);
         MemoryProfiler.CollectAllocations(true);
         MemoryProfiler.GetSnapshot("Before");
-        SqlProcessor.GetSanitizedSql(statements[0]);
+        SqlProcessor.GetSanitizedSql("SELECT name FROM Customers");
         MemoryProfiler.GetSnapshot("After");
         break;
 
