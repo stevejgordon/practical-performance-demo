@@ -71,7 +71,7 @@ switch (mode)
     default:
         var config = ManualConfig.Create(DefaultConfig.Instance)
             .WithArtifactsPath("BenchmarkResults")
-            .HideColumns(Column.Error, Column.StdDev, Column.Method);
+            .HideColumns(Column.Error, Column.StdDev, Column.Method, Column.Median);
         BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
         break;
 }
