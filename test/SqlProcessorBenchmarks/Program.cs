@@ -38,17 +38,34 @@ switch (mode)
         break;
 
     case vsMemoryProfilingMode:
-        PrepareForProfiling(1000);
+        PrepareForProfiling(0);
+
+        Span<long> data = stackalloc long[4];
 
         Console.WriteLine("Take before snapshot");
         Console.ReadKey();
 
-        foreach (var stmt in statements)
-        {
-            SqlProcessor.GetSanitizedSql(stmt);
-        }
+        GC.GetTotalAllocatedBytes(true);
+        GC.GetAllocatedBytesForCurrentThread();
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        data[0] = GC.GetTotalAllocatedBytes(true);
+        data[1] = GC.GetAllocatedBytesForCurrentThread();
+
+        SqlProcessor.GetSanitizedSql("SELECT * FROM Orders d, OrderDetails ox");
+
+        data[2] = GC.GetTotalAllocatedBytes(true);
+        data[3] = GC.GetAllocatedBytesForCurrentThread();
 
         Console.WriteLine("Take after snapshot");
+        Console.ReadKey();
+
+        Console.WriteLine("Total allocated bytes: {0}", data[2] - data[0]);
+        Console.WriteLine("Total allocated bytes for current thread: {0}", data[3] - data[1]);
+
         Console.ReadKey();
 
         break;
